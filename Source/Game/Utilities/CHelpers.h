@@ -16,14 +16,23 @@ class GAME_API CHelpers
 {
 public:
 	template<typename T>
-	static void GetAsset(T** OutAsset ,FString InPath)
+	static void GetAsset(T** OutAsset, FString InPath)
 	{
 		ConstructorHelpers::FObjectFinder<T> asset(*InPath);
 		verifyf(asset.Succeeded(), L"Asset Not Found");
-		
+
 		*OutAsset = asset.Object;
 	}
-	
+
+	template<typename T>
+	static void GetAssetDynamic(T** OutAsset, FString InPath)
+	{
+		T* obj = Cast<T>(StaticLoadObject(T::StaticClass(), nullptr, *InPath));
+		verifyf(!!obj, L"Asset Not Found(Dynamic)");
+
+		*OutAsset = obj;
+	}
+
 	template<typename T>
 	static void GetClass(TSubclassOf<T>* OutClass, FString InPath)
 	{
@@ -53,7 +62,12 @@ public:
 	static void CreateActorComponent(AActor* InActor, T** OutComponent, FName InName)
 	{
 		*OutComponent = InActor->CreateDefaultSubobject<T>(InName);
+	}
 
+	template<typename T>
+	static T* GetComponent(AActor* InActor)
+	{
+		return Cast<T>(InActor->GetComponentByClass(T::StaticClass()));
 	}
 };
 

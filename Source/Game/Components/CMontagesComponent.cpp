@@ -5,14 +5,18 @@
 UCMontagesComponent::UCMontagesComponent()
 {
 
-	PrimaryComponentTick.bCanEverTick = true;
-
 }
 
 
 void UCMontagesComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (DataTable == nullptr)
+	{
+		CLog::Log("DataTable is not found in " + GetOwner()->GetName());
+		return;
+	}
 
 	TArray<FMontageData*> datas;
 	DataTable->GetAllRows<FMontageData>("", datas);
@@ -29,7 +33,16 @@ void UCMontagesComponent::BeginPlay()
 		}
 	}
 
+}	
 
+void UCMontagesComponent::PlayRoll()
+{
+	PlayAnimMontage(EStateType::Roll);
+}
+
+void UCMontagesComponent::PlayBackStep()
+{
+	PlayAnimMontage(EStateType::BackStep);
 }
 
 void UCMontagesComponent::PlayAnimMontage(EStateType InType)
@@ -43,7 +56,5 @@ void UCMontagesComponent::PlayAnimMontage(EStateType InType)
 	{
 		if (!!data->AnimMontage)
 			character->PlayAnimMontage(data->AnimMontage, data->PlayRate, data->StartSection);
-
 	}
-
 }

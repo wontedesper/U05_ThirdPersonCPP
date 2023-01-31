@@ -10,7 +10,7 @@ void UCStateComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-
+	
 }
 
 void UCStateComponent::SetIdleMode()
@@ -26,6 +26,11 @@ void UCStateComponent::SetRollMode()
 void UCStateComponent::SetBackStepMode()
 {
 	ChangeType(EStateType::BackStep);
+}
+
+void UCStateComponent::SetEquipMode()
+{
+	ChangeType(EStateType::Equip);
 }
 
 void UCStateComponent::ChangeType(EStateType InNewType)

@@ -36,6 +36,9 @@ class GAME_API UCMontagesComponent : public UActorComponent
 public:	
 	UCMontagesComponent();
 
+	void PlayRoll();
+	void PlayBackStep();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -45,8 +48,7 @@ private:
 
 private:
 	void PlayAnimMontage(EStateType InType);
-
+		
 private:
 	FMontageData* Datas[(int32)EStateType::Max];
-	
 };
