@@ -2,6 +2,7 @@
 #include "Global.h"
 #include "Actions/CActionData.h"
 #include "Actions/CEquipment.h"
+#include "Actions/CDoAction.h"
 #include "GameFramework/Character.h"
 
 UCActionComponent::UCActionComponent()
@@ -14,17 +15,17 @@ void UCActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ACharacter* character = Cast<ACharacter>(GetOwner());
+	ACharacter* character =	Cast<ACharacter>(GetOwner());
 
 	for (int32 i = 0; i < (int32)EActionType::Max; i++)
 	{
 		if (!!Datas[i])
 			Datas[i]->BeginPlay(character);
 	}
-
+	
 }
 
-void UCActionComponent::SetUnarmedMode()
+void UCActionComponent::SetUnaremdMode()
 {
 	if (!!Datas[(int32)Type] && Datas[(int32)Type]->GetEquipment())
 		Datas[(int32)Type]->GetEquipment()->Unequip();
@@ -64,14 +65,27 @@ void UCActionComponent::SetStormMode()
 	SetMode(EActionType::Storm);
 }
 
+void UCActionComponent::DoAction()
+{
+	CheckTrue(IsUnaremdMode());
+
+	if (!!Datas[(int32)Type] && Datas[(int32)Type]->GetDoAction())
+	{
+		ACDoAction* doAction = Datas[(int32)Type]->GetDoAction();
+
+		if (!!doAction)
+			doAction->DoAction();
+	}
+}
+
 void UCActionComponent::SetMode(EActionType InNewType)
 {
 	if (Type == InNewType)
 	{
-		SetUnarmedMode();
+		SetUnaremdMode();
 		return;
 	}
-	else if (IsUnarmedMode() == false)
+	else if (IsUnaremdMode() == false)
 	{
 		if (!!Datas[(int32)Type] && Datas[(int32)Type]->GetEquipment())
 			Datas[(int32)Type]->GetEquipment()->Unequip();

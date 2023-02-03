@@ -12,8 +12,8 @@ UCLASS()
 class GAME_API ACEquipment : public AActor
 {
 	GENERATED_BODY()
-
-public:
+	
+public:	
 	ACEquipment();
 
 	FORCEINLINE void SetData(FEquipmentData InData) { Data = InData; }
@@ -59,5 +59,4 @@ protected:
 private:
 	FEquipmentData Data;
 	FLinearColor Color;
-
 };

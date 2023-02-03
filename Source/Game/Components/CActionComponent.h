@@ -12,12 +12,12 @@ enum class EActionType : uint8
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActionTypeChanged, EActionType, InPrevType, EActionType, InNewType);
 
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAME_API UCActionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:
+public:	
 	UCActionComponent();
 
 protected:
@@ -29,7 +29,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintPure)
-		FORCEINLINE bool IsUnarmedMode() { return Type == EActionType::Unarmed; }
+		FORCEINLINE bool IsUnaremdMode() { return Type == EActionType::Unarmed; }
 
 	UFUNCTION(BlueprintPure)
 		FORCEINLINE bool IsFistMode() { return Type == EActionType::Fist; }
@@ -50,13 +50,16 @@ public:
 		FORCEINLINE bool IsStormBallMode() { return Type == EActionType::Storm; }
 
 public:
-	void SetUnarmedMode();
+	void SetUnaremdMode();
 	void SetFistMode();
 	void SetOneHandMode();
 	void SetTwoHandMode();
 	void SetWarpMode();
 	void SetMagicMode();
 	void SetStormMode();
+
+public:
+	void DoAction();
 
 public:
 	UPROPERTY(BlueprintAssignable)

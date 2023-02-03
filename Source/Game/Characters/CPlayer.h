@@ -3,12 +3,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Components/CStateComponent.h"
-#include "Materials/MaterialInstanceConstant.h"
-#include "Materials/MaterialInstanceDynamic.h"
+#include "ICharacter.h"
 #include "CPlayer.generated.h"
 
 UCLASS()
-class GAME_API ACPlayer : public ACharacter
+class GAME_API ACPlayer : public ACharacter, public IICharacter
 {
 	GENERATED_BODY()
 
@@ -63,6 +62,8 @@ private:
 	void OnOneHand();
 	void OnTwoHand();
 
+	void OnDoAction();
+
 private:
 	void Begin_Roll();
 	void Begin_BackStep();
@@ -75,10 +76,10 @@ public:
 	virtual void ChangeColor(FLinearColor InColor);
 
 private:
-	class UMaterialInstanceDynamic* BodyMaterial;
-	class UMaterialInstanceDynamic* LogoMaterial;
-
-private:
 	UFUNCTION()
 		void OnStateTypeChanged(EStateType InPrevType, EStateType InNewType);
+
+private:
+	class UMaterialInstanceDynamic* BodyMaterial;
+	class UMaterialInstanceDynamic* LogoMaterial;
 };

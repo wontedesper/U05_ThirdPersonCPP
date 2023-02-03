@@ -7,7 +7,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
-
+#include "Materials/MaterialInstanceConstant.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 ACPlayer::ACPlayer()
 {
@@ -18,11 +19,11 @@ ACPlayer::ACPlayer()
 	CHelpers::CreateSceneComponent(this, &Camera, "Camera", SpringArm);
 
 	//Create ActorComponent
+	CHelpers::CreateActorComponent(this, &Action, "Action");
+	CHelpers::CreateActorComponent(this, &Montages, "Montages");
 	CHelpers::CreateActorComponent(this, &Status, "Status");
 	CHelpers::CreateActorComponent(this, &Option, "Option");
 	CHelpers::CreateActorComponent(this, &State, "State");
-	CHelpers::CreateActorComponent(this, &Montages, "Montages");
-	CHelpers::CreateActorComponent(this, &Action, "Action");
 
 	//Component Settings
 	GetMesh()->SetRelativeLocation(FVector(0, 0, -88));
@@ -54,7 +55,7 @@ void ACPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Create Dynamic Material
+	//Create Dynmaic Material
 	UMaterialInstanceConstant* bodyMaterial;
 	UMaterialInstanceConstant* logoMaterial;
 
@@ -67,9 +68,12 @@ void ACPlayer::BeginPlay()
 	GetMesh()->SetMaterial(0, BodyMaterial);
 	GetMesh()->SetMaterial(1, LogoMaterial);
 
+
+
+
 	State->OnStateTypeChanged.AddDynamic(this, &ACPlayer::OnStateTypeChanged);
 
-	Action->SetUnarmedMode();
+	Action->SetUnaremdMode();
 }
 
 void ACPlayer::Tick(float DeltaTime)
@@ -86,6 +90,7 @@ void ACPlayer::OnStateTypeChanged(EStateType InPrevType, EStateType InNewType)
 		case EStateType::BackStep:	Begin_BackStep();		break;
 	}
 }
+
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -104,6 +109,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Fist", EInputEvent::IE_Pressed, this, &ACPlayer::OnFist);
 	PlayerInputComponent->BindAction("OneHand", EInputEvent::IE_Pressed, this, &ACPlayer::OnOneHand);
 	PlayerInputComponent->BindAction("TwoHand", EInputEvent::IE_Pressed, this, &ACPlayer::OnTwoHand);
+
+	PlayerInputComponent->BindAction("Action", EInputEvent::IE_Pressed, this, &ACPlayer::OnDoAction);
 }
 
 void ACPlayer::OnMoveForward(float InAxis)
@@ -189,6 +196,11 @@ void ACPlayer::OnTwoHand()
 	Action->SetTwoHandMode();
 }
 
+void ACPlayer::OnDoAction()
+{
+	Action->DoAction();
+}
+
 void ACPlayer::Begin_Roll()
 {
 	bUseControllerRotationYaw = false;
@@ -211,7 +223,7 @@ void ACPlayer::Begin_BackStep()
 
 void ACPlayer::End_Roll()
 {
-	if (Action->IsUnarmedMode()==false)
+	if (Action->IsUnaremdMode() == false)
 	{
 		bUseControllerRotationYaw = true;
 		GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -222,7 +234,7 @@ void ACPlayer::End_Roll()
 
 void ACPlayer::End_BackStep()
 {
-	if (Action->IsUnarmedMode())
+	if (Action->IsUnaremdMode())
 	{
 		bUseControllerRotationYaw = false;
 		GetCharacterMovement()->bOrientRotationToMovement = true;

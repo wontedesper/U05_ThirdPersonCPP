@@ -6,29 +6,24 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-// Sets default values
 ACEquipment::ACEquipment()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 
 }
 
-// Called when the game starts or when spawned
 void ACEquipment::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	OwnerCharacter = Cast<ACharacter>(GetOwner());
 	State = CHelpers::GetComponent<UCStateComponent>(OwnerCharacter);
 	Status = CHelpers::GetComponent<UCStatusComponent>(OwnerCharacter);
-	
 }
 
 void ACEquipment::Equip_Implementation()
 {
 	State->SetEquipMode();
-
+	
 	if (!!Data.AnimMontage)
 		OwnerCharacter->PlayAnimMontage(Data.AnimMontage, Data.PlayRate, Data.StartSection);
 	else
@@ -46,7 +41,6 @@ void ACEquipment::Equip_Implementation()
 	IICharacter* characterInterface = Cast<IICharacter>(OwnerCharacter);
 	CheckNull(characterInterface);
 	characterInterface->ChangeColor(Color);
-
 }
 
 void ACEquipment::Begin_Equip_Implementation()
@@ -68,3 +62,4 @@ void ACEquipment::Unequip_Implementation()
 	if (OnUnequipmentDelegate.IsBound())
 		OnUnequipmentDelegate.Broadcast();
 }
+
