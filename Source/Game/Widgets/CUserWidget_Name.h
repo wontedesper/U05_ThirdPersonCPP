@@ -12,5 +12,7 @@ class GAME_API UCUserWidget_Name : public UUserWidget
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void SetPawnName(const FString& InPawnName);
-	
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void SetControllerName(const FString& InControllerName);
 };

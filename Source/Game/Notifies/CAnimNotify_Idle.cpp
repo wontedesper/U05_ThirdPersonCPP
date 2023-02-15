@@ -12,8 +12,8 @@ void UCAnimNotify_Idle::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	Super::Notify(MeshComp, Animation);
 	CheckNull(MeshComp);
 
-
 	UCStateComponent* state = CHelpers::GetComponent<UCStateComponent>(MeshComp->GetOwner());
 	CheckNull(state);
-	//ownercharacter->statecomp->setidle
+
+	state->SetIdleMode();
 }

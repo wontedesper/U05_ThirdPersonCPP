@@ -56,9 +56,9 @@ void ACDoAction_Melee::OnAttachmentBeginOverlap(ACharacter* InAttacker, AActor* 
 	Super::OnAttachmentBeginOverlap(InAttacker, InCauser, InOtherCharacter);
 
 	//Add HittedCharacter
-	int32 hittedCharacter = HittedCharacters.Num();
+	int32 hittedCharactersNum = HittedCharacters.Num();
 	HittedCharacters.AddUnique(InOtherCharacter);
-
+	
 	//HitStop
 	float hitStop = Datas[ComboCount].HitStop;
 	if (FMath::IsNearlyZero(hitStop) == false)
@@ -84,12 +84,12 @@ void ACDoAction_Melee::OnAttachmentBeginOverlap(ACharacter* InAttacker, AActor* 
 		controller->PlayerCameraManager->PlayCameraShake(shake);
 	}
 
-	if (hittedCharacter < HittedCharacters.Num())
+	//TakeDamage
+	if (hittedCharactersNum < HittedCharacters.Num())
 	{
 		FDamageEvent e;
 		InOtherCharacter->TakeDamage(Datas[ComboCount].Power, e, InAttacker->GetController(), InCauser);
 	}
-
 }
 
 void ACDoAction_Melee::OnAttachmentEndOverlap(ACharacter* InAttacker, AActor* InCauser, ACharacter* InOtherCharacter)
@@ -101,3 +101,4 @@ void ACDoAction_Melee::RestoreGlobalTimeDilation()
 {
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.f);
 }
+

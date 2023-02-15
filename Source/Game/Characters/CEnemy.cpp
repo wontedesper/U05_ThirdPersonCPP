@@ -1,6 +1,7 @@
 #include "CEnemy.h"
 #include "Global.h"
 #include "Actions/CActionData.h"
+#include "Actions/CThrow.h"
 #include "Components/CStatusComponent.h"
 #include "Components/CMontagesComponent.h"
 #include "Components/CActionComponent.h"
@@ -10,6 +11,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
 
 ACEnemy::ACEnemy()
 {
@@ -77,16 +79,21 @@ void ACEnemy::BeginPlay()
 
 	//Widget Property Settings
 	NameWidget->InitWidget();
+
 	UCUserWidget_Name* nameWidgetObject = Cast<UCUserWidget_Name>(NameWidget->GetUserWidgetObject());
 	if (!!nameWidgetObject)
+	{
 		nameWidgetObject->SetPawnName(GetName());
+		nameWidgetObject->SetControllerName(GetController()->GetName());
+		nameWidgetObject->SetVisibility(visibleType);
+	}
 
 	HealthWidget->InitWidget();
 	UCUserWidget_Health* healthWidgetObject = Cast<UCUserWidget_Health>(HealthWidget->GetUserWidgetObject());
 	if (!!healthWidgetObject)
 		healthWidgetObject->Update(Status->GetHealth(), Status->GetMaxHealth());
 
-	Action->SetUnaremdMode();
+	//Action->SetUnaremdMode();
 
 }
 
@@ -102,7 +109,9 @@ void ACEnemy::ChangeColor(FLinearColor InColor)
 
 	BodyMaterial->SetVectorParameterValue("BodyColor", InColor);
 	LogoMaterial->SetVectorParameterValue("BodyColor", InColor);
+
 }
+
 
 void ACEnemy::RestoreLogoColor()
 {
@@ -127,6 +136,8 @@ float ACEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AContro
 	Causer = DamageCauser;
 	Attacker = Cast<ACharacter>(EventInstigator->GetPawn());
 
+	Action->AbortByDamaged();
+
 	Status->DecreaseHealth(DamageValue);
 
 	if (Status->GetHealth() <= 0.f)
@@ -140,8 +151,6 @@ float ACEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AContro
 	return DamageValue;
 }
 
-
-
 void ACEnemy::Hitted()
 {
 	//Decrease Health Widget
@@ -151,20 +160,56 @@ void ACEnemy::Hitted()
 
 	//Play Hit Montage
 	Montages->PlayHitted();
+	Status->SetMove();
 
-	//Launch HitBack
+	//Lauch HitBack
 	FVector start = GetActorLocation();
 	FVector target = Attacker->GetActorLocation();
 	FVector direction = start - target;
 	direction.Normalize();
-
+	
 	LaunchCharacter(direction * LaunchValue * DamageValue, true, false);
 
-	//Change Logo Color
+	//Change LogoColor
 	ChangeColor(FLinearColor::Red * 35.f);
 	UKismetSystemLibrary::K2_SetTimer(this, "RestoreLogoColor", 1.f, false);
+
 }
 
 void ACEnemy::Dead()
 {
+	CheckFalse(State->IsDeadMode());
+
+	//Widget Visible false
+	NameWidget->SetVisibility(false);
+	HealthWidget->SetVisibility(false);
+
+	//All Weapon Collision Disable
+	Action->Dead();
+
+	//Ragdoll
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->GlobalAnimRateScale = 0.f;
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	FVector start = GetActorLocation();
+	FVector target = Causer->GetActorLocation();
+	FVector direction = start - target;
+	direction.Normalize();
+
+	if (Causer->IsA<ACThrow>())
+		DeadLaunchValue *= 0.075f;
+
+	GetMesh()->AddForce(direction * DamageValue * DeadLaunchValue);
+
+	//End_Dead
+	UKismetSystemLibrary::K2_SetTimer(this, "End_Dead", 5.f, false);
+}
+
+void ACEnemy::End_Dead()
+{
+	Action->End_Dead();
+
+	Destroy();
 }

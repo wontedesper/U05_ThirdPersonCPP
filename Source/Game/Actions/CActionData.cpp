@@ -5,10 +5,11 @@
 #include "CDoAction.h"
 #include "GameFramework/Character.h"
 
-void UCActionData::BeginPlay(ACharacter* InOnwerCharacter)
+void UCActionData::BeginPlay(ACharacter* InOnwerCharacter, UCActionObjectContainer** OutObject)
 {
 	FTransform transform;
 
+	ACAttachment* Attachment = nullptr;
 	if (!!AttachmentClass)
 	{
 		Attachment = InOnwerCharacter->GetWorld()->SpawnActorDeferred<ACAttachment>(AttachmentClass, transform, InOnwerCharacter);
@@ -16,6 +17,7 @@ void UCActionData::BeginPlay(ACharacter* InOnwerCharacter)
 		UGameplayStatics::FinishSpawningActor(Attachment, transform);
 	}
 
+	ACEquipment* Equipment = nullptr;
 	if (!!EquipmentClass)
 	{
 		Equipment = InOnwerCharacter->GetWorld()->SpawnActorDeferred<ACEquipment>(EquipmentClass, transform, InOnwerCharacter);
@@ -32,6 +34,7 @@ void UCActionData::BeginPlay(ACharacter* InOnwerCharacter)
 		}
 	}
 
+	ACDoAction* DoAction = nullptr;
 	if (!!DoActionClass)
 	{
 		DoAction = InOnwerCharacter->GetWorld()->SpawnActorDeferred<ACDoAction>(DoActionClass, transform, InOnwerCharacter);
@@ -40,12 +43,23 @@ void UCActionData::BeginPlay(ACharacter* InOnwerCharacter)
 		DoAction->SetActorLabel(GetLabelName(InOnwerCharacter, "DoAction"));
 		UGameplayStatics::FinishSpawningActor(DoAction, transform);
 
+		if (!!Equipment)
+		{
+			DoAction->SetEquipped(Equipment->IsEquipped());
+		}
+
 		if (!!Attachment)
 		{
 			Attachment->OnAttachmentBeginOverlap.AddDynamic(DoAction, &ACDoAction::OnAttachmentBeginOverlap);
 			Attachment->OnAttachmentEndOverlap.AddDynamic(DoAction, &ACDoAction::OnAttachmentEndOverlap);
 		}
 	}
+
+	*OutObject = NewObject<UCActionObjectContainer>();
+	(*OutObject)->Attachment = Attachment;
+	(*OutObject)->Equipment = Equipment;
+	(*OutObject)->DoAction = DoAction;
+	(*OutObject)->EquipmentColor = EquipmentColor;
 }
 
 FString UCActionData::GetLabelName(ACharacter* InOnwerCharacter, FString InMiddleName)

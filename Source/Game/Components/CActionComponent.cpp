@@ -1,7 +1,9 @@
 #include "CActionComponent.h"
 #include "Global.h"
 #include "Actions/CActionData.h"
+#include "Actions/CActionObjectContainer.h"
 #include "Actions/CEquipment.h"
+#include "Actions/CAttachment.h"
 #include "Actions/CDoAction.h"
 #include "GameFramework/Character.h"
 
@@ -20,17 +22,17 @@ void UCActionComponent::BeginPlay()
 	for (int32 i = 0; i < (int32)EActionType::Max; i++)
 	{
 		if (!!Datas[i])
-			Datas[i]->BeginPlay(character);
+			Datas[i]->BeginPlay(character, &DataObjects[i]);
 	}
 	
 }
 
 void UCActionComponent::SetUnaremdMode()
 {
-	if (!!Datas[(int32)Type] && Datas[(int32)Type]->GetEquipment())
-		Datas[(int32)Type]->GetEquipment()->Unequip();
+	if (!!DataObjects[(int32)Type] && DataObjects[(int32)Type]->GetEquipment())
+		DataObjects[(int32)Type]->GetEquipment()->Unequip();
 
-	Datas[(int32)EActionType::Unarmed]->GetEquipment()->Equip();
+	DataObjects[(int32)EActionType::Unarmed]->GetEquipment()->Equip();
 
 	ChangeType(EActionType::Unarmed);
 }
@@ -55,7 +57,7 @@ void UCActionComponent::SetWarpMode()
 	SetMode(EActionType::Warp);
 }
 
-void UCActionComponent::SetMagicMode()
+void UCActionComponent::SetMagicBallMode()
 {
 	SetMode(EActionType::MagicBall);
 }
@@ -69,12 +71,30 @@ void UCActionComponent::DoAction()
 {
 	CheckTrue(IsUnaremdMode());
 
-	if (!!Datas[(int32)Type] && Datas[(int32)Type]->GetDoAction())
+	if (!!DataObjects[(int32)Type] && DataObjects[(int32)Type]->GetDoAction())
 	{
-		ACDoAction* doAction = Datas[(int32)Type]->GetDoAction();
+		ACDoAction* doAction = DataObjects[(int32)Type]->GetDoAction();
 
 		if (!!doAction)
 			doAction->DoAction();
+	}
+}
+
+void UCActionComponent::DoOnAim()
+{
+	if (!!DataObjects[(int32)Type] && !!DataObjects[(int32)Type]->GetDoAction())
+	{
+		ACDoAction* action = DataObjects[(int32)Type]->GetDoAction();
+		action->OnAim();
+	}
+}
+
+void UCActionComponent::DoOffAim()
+{
+	if (!!DataObjects[(int32)Type] && !!DataObjects[(int32)Type]->GetDoAction())
+	{
+		ACDoAction* action = DataObjects[(int32)Type]->GetDoAction();
+		action->OffAim();
 	}
 }
 
@@ -87,12 +107,12 @@ void UCActionComponent::SetMode(EActionType InNewType)
 	}
 	else if (IsUnaremdMode() == false)
 	{
-		if (!!Datas[(int32)Type] && Datas[(int32)Type]->GetEquipment())
-			Datas[(int32)Type]->GetEquipment()->Unequip();
+		if (!!DataObjects[(int32)Type] && DataObjects[(int32)Type]->GetEquipment())
+			DataObjects[(int32)Type]->GetEquipment()->Unequip();
 	}
 
-	if (!!Datas[(int32)InNewType] && Datas[(int32)InNewType]->GetEquipment())
-		Datas[(int32)InNewType]->GetEquipment()->Equip();
+	if (!!DataObjects[(int32)InNewType] && DataObjects[(int32)InNewType]->GetEquipment())
+		DataObjects[(int32)InNewType]->GetEquipment()->Equip();
 
 	ChangeType(InNewType);
 }
@@ -104,4 +124,49 @@ void UCActionComponent::ChangeType(EActionType InNewType)
 
 	if (OnActionTypeChanged.IsBound())
 		OnActionTypeChanged.Broadcast(prevType, InNewType);
+}
+
+void UCActionComponent::Dead()
+{
+	OffAllCollisions();
+}
+
+void UCActionComponent::End_Dead()
+{
+	for (int32 i = 0; i < (int32)EActionType::Max; i++)
+	{
+		if (!!DataObjects[i] && !!DataObjects[i]->GetAttachment())
+			DataObjects[i]->GetAttachment()->Destroy();
+
+		if (!!DataObjects[i] && !!DataObjects[i]->GetEquipment())
+			DataObjects[i]->GetEquipment()->Destroy();
+
+		if (!!DataObjects[i] && !!DataObjects[i]->GetDoAction())
+			DataObjects[i]->GetDoAction()->Destroy();
+	}
+}
+
+void UCActionComponent::OffAllCollisions()
+{
+	for (UCActionObjectContainer* data : DataObjects)
+	{
+		if (data == nullptr)
+			continue;
+
+		if (data->GetAttachment() == nullptr)
+			continue;
+
+		data->GetAttachment()->OffCollisions();
+	}
+}
+
+void UCActionComponent::AbortByDamaged()
+{
+	CheckNull(DataObjects[(int32)Type]);
+	CheckTrue(IsUnaremdMode());
+
+	DataObjects[(int32)Type]->GetEquipment()->Begin_Equip();
+	DataObjects[(int32)Type]->GetEquipment()->End_Equip();
+
+	DataObjects[(int32)Type]->GetDoAction()->Abort();
 }

@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "ICharacter.h"
 #include "Components/CStateComponent.h"
+#include "Components/SlateWrapperTypes.h"
 #include "CEnemy.generated.h"
 
 UCLASS()
@@ -29,12 +30,21 @@ private:
 	UFUNCTION()
 		void RestoreLogoColor();
 
-	void Hitted();
-	void Dead();
+	void Hitted() override;
+	void Dead() override;
+
+	UFUNCTION()
+		void End_Dead() override;
 
 private:
 	UPROPERTY(EditAnywhere)
+		ESlateVisibility visibleType = ESlateVisibility::Hidden;
+
+	UPROPERTY(EditAnywhere)
 		float LaunchValue = 25.f;
+
+	UPROPERTY(EditAnywhere)
+		float DeadLaunchValue = 1e+7f;
 
 	UPROPERTY(VisibleDefaultsOnly)
 		class UWidgetComponent* NameWidget;
@@ -42,10 +52,12 @@ private:
 	UPROPERTY(VisibleDefaultsOnly)
 		class UWidgetComponent* HealthWidget;
 
-private:
-	UPROPERTY(VisibleDefaultsOnly)
+
+protected:
+	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly)
 		class UCActionComponent* Action;
 
+private:
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCMontagesComponent* Montages;
 

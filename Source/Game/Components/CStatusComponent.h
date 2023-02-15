@@ -4,6 +4,11 @@
 #include "Components/ActorComponent.h"
 #include "CStatusComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EWalkSpeedTpye : uint8
+{
+	Sneak, Walk, Run, Max
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAME_API UCStatusComponent : public UActorComponent
@@ -20,9 +25,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	FORCEINLINE float GetSneakSpeed() { return SneakSpeed; }
-	FORCEINLINE float GetWalkSpeed() { return WalkSpeed; }
-	FORCEINLINE float GetRunSpeed() { return RunSpeed; }
+	FORCEINLINE float GetSneakSpeed() { return Speed[(int32)EWalkSpeedTpye::Sneak]; }
+	FORCEINLINE float GetWalkSpeed() { return Speed[(int32)EWalkSpeedTpye::Walk]; }
+	FORCEINLINE float GetRunSpeed() { return Speed[(int32)EWalkSpeedTpye::Run]; }
 	FORCEINLINE bool IsCanMove() { return bCanMove; }
 
 	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
@@ -31,19 +36,16 @@ public:
 	void SetMove();
 	void SetStop();
 
+	void SetSpeed(EWalkSpeedTpye InType);
+
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Health")
 		float MaxHealth = 100.f;
 
 	UPROPERTY(EditAnywhere, Category = "Speed")
-		float SneakSpeed = 200;
-
-	UPROPERTY(EditAnywhere, Category = "Speed")
-		float WalkSpeed = 400;
+		float Speed[(int32)EWalkSpeedTpye::Max] = { 200, 400, 600 };
 		
-	UPROPERTY(EditAnywhere, Category = "Speed")
-		float RunSpeed = 600;
-
 private:
 	float Health;
 

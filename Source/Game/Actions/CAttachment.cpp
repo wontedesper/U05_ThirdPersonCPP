@@ -38,7 +38,6 @@ void ACAttachment::AttachTo(FName InSocketName)
 void ACAttachment::AttachToCollision(USceneComponent* InComponent, FName InSocketName)
 {
 	InComponent->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), InSocketName);
-
 }
 
 void ACAttachment::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -69,8 +68,20 @@ void ACAttachment::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponen
 
 void ACAttachment::OnCollisions(FString InCollisionName)
 {
-	for (UShapeComponent* shape : ShapeComponents)
-		shape->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	if (InCollisionName.Compare("None") == 0)
+	{
+		for (UShapeComponent* shape : ShapeComponents)
+			shape->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+	else
+	{
+		for (UShapeComponent* shape : ShapeComponents)
+		{
+			if (shape->GetName().Contains(InCollisionName))
+				shape->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		}
+	}
+	
 }
 
 void ACAttachment::OffCollisions()

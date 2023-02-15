@@ -25,7 +25,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintPure)
-		FORCEINLINE class UCActionData* GetCurrent() { return Datas[(int32)Type]; }
+		FORCEINLINE class UCActionObjectContainer* GetCurrent() { return DataObjects[(int32)Type]; }
 
 public:
 	UFUNCTION(BlueprintPure)
@@ -41,7 +41,7 @@ public:
 		FORCEINLINE bool IsTwoHandMode() { return Type == EActionType::TwoHand; }
 
 	UFUNCTION(BlueprintPure)
-		FORCEINLINE bool IsWarpHandMode() { return Type == EActionType::Warp; }
+		FORCEINLINE bool IsWarpMode() { return Type == EActionType::Warp; }
 
 	UFUNCTION(BlueprintPure)
 		FORCEINLINE bool IsMagicBallMode() { return Type == EActionType::MagicBall; }
@@ -50,16 +50,26 @@ public:
 		FORCEINLINE bool IsStormBallMode() { return Type == EActionType::Storm; }
 
 public:
-	void SetUnaremdMode();
-	void SetFistMode();
-	void SetOneHandMode();
-	void SetTwoHandMode();
-	void SetWarpMode();
-	void SetMagicMode();
-	void SetStormMode();
+	UFUNCTION(BlueprintCallable) void SetUnaremdMode();
+	UFUNCTION(BlueprintCallable) void SetFistMode();
+	UFUNCTION(BlueprintCallable) void SetOneHandMode();
+	UFUNCTION(BlueprintCallable) void SetTwoHandMode();
+	UFUNCTION(BlueprintCallable) void SetWarpMode();
+	UFUNCTION(BlueprintCallable) void SetMagicBallMode();
+	UFUNCTION(BlueprintCallable) void SetStormMode();
 
 public:
 	void DoAction();
+
+	void DoOnAim();
+	void DoOffAim();
+
+	void Dead();
+	void End_Dead();
+
+	void OffAllCollisions();
+
+	void AbortByDamaged();
 
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -71,7 +81,11 @@ private:
 
 private:
 	UPROPERTY(EditDefaultsOnly)
-		class UCActionData* Datas[(int32)EActionType::Max];
+		class UCActionData* Datas[(int32)EActionType::Max]; //DataAsset
+
+	UPROPERTY()
+		class UCActionObjectContainer* DataObjects[(int32)EActionType::Max]; //Spawned Object
+
 
 private:
 	EActionType Type;

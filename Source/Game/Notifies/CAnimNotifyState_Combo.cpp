@@ -18,7 +18,7 @@ void UCAnimNotifyState_Combo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAni
 
 	ACDoAction_Melee* melee = Cast<ACDoAction_Melee>(action->GetCurrent()->GetDoAction());
 	CheckNull(melee);
-
+	
 	melee->EnableCombo();
 }
 
